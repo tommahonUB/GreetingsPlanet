@@ -1,0 +1,31 @@
+{
+  "name": "greetingsplanet",
+  "version": "1.0.0",
+  "description": "My first site",
+  "main": "index.js",
+  "scripts": {
+	"dev": "nodemon index.js",
+    	"start": "node index.js",
+    	"test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tommahonUB/GreetingsPlanet.git"
+  },
+  "keywords": [
+    "first",
+    "site",
+    "greetings",
+    "planet"
+  ],
+  "author": "Thomas Mahoney",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/tommahonUB/GreetingsPlanet/issues"
+  },
+  "homepage": "https://github.com/tommahonUB/GreetingsPlanet#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "nodemon": "^2.0.7"
+  }
+}
