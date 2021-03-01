@@ -1,13 +1,24 @@
  <!DOCTYPE html>
 <html>
 <head>
+<style>
+img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 40%;
+  transform: translate(0%, 10%);
+}
+}
+</style>
 <title>Baby's first fansite</title>
-<link rel="stylesheet" type="text/css" href="stylesheet.css"/>
+<%- include('header.ejs') %>
 </head>
 <body>
-  <div id="mainpanel">
-  Hello, and welcome to my first website, <%=nomen%>! I will be going over the special attacks of Street Fighter 2!
+<div id="mainpanel">
+  Hello, and welcome to my first website! I will be going over the special attacks of Street Fighter 2!
 </div>
-  <%- include('navbar.ejs') %>
+ <img src="https://i.imgur.com/CzLXREI.png" alt="entry pic" width="500" height="600"/>
+<%- include('navbar.ejs') %>
 </body>
 </html>

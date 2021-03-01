@@ -1,18 +1,18 @@
-<!DOCTYPE html>
 <html>
 <head>
 <title>Character profile: Chun-Li</title>
-<link rel="stylesheet" type="text/css" href="stylesheet.css"/>
+<%- include('header.ejs') %>
 </head>
 <body>
 
-<h1>Here are Chun-Li's special attacks</h1>
-<p1>1. Lightning Kick: Simply press any kick button rapidly to strike with multiple kicks.</p1>
-<p2>2. Spinning bird kick: You rotate feet first in the direction you're facing. Hold down, then hit kick and up at the same time</p2>
+  <div id="mainpanel">
+    <h1>Here are Chun-Li's special attacks</h1>
+    <ol>
+      <li>Lightning Kick: Simply press any kick button rapidly to strike with multiple kicks.</li>
+      <li>Spinning bird kick: You rotate feet first in the direction you're facing. Hold down, then hit kick and up at the same time</li>
+    </ol>
 
-<a href="https://www.youtube.com/watch?v=4a7M7cjHVzo">Click here to see them all in action, alongside her normal attacks</a>
-
-<%- include('navbar.ejs') %>
-
+</div>
+  <%- include('navbar.ejs') %>
 </body>
 </html>
