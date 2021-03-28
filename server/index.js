@@ -4,6 +4,8 @@ const path = require('path');
 const { response } = require('express');
 const bodyParser = require('body-parser');
 const session = require('express-session');
+const mongoose = require('mongoose');
+const {BlogPost} = require('./models.js')
 
 //Navigation
 
@@ -26,11 +28,17 @@ app.use(session({
 	}
 }));
 
+mongoose.connect('mongodb://localhost:27017/StreetFighter', {useNewUrlParser: true});
 app.listen(2000);
 
 //setting views
 app.set('view engine','ejs');
 app.set('views',viewsPath);
+
+app.use((req, res, next)=>{
+    console.log(req.originalUrl);
+    next();
+})
 
 
 
@@ -72,8 +80,30 @@ app.get('/EHonda', function(req, res) {
 	res.render('EHonda', {data: req.session});
 });
 
+//new requests since tutorial 4
+
+app.get('/blog', (req, res)=>{
+    res.render('blog', {data: req.session});
+});
+
+app.get('/writing', (req, res)=>{
+    res.render('writing', {data: req.session});
+});
+
+app.get('/blog/entry', (req, res)=>{
+    res.render('entry', {data: req.session, entry: {}});
+});
+
 app.post('/welcome', (req, res) => {
+    req.session.username=req.body.nombre;
+    res.send('SUCCESS');
+});
+
+//tutorial 4 post requests
+
+app.post('/blog/writepost', async (req, res)=>{
 	console.log(req.body);
-	req.session.username=req.body.nombre;
-	res.send('SUCCESS');
+	let newPost = new BlogPost(req.body);
+	await newPost.save();
+	res.redirect('/');
 });
