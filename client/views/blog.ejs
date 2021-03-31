@@ -5,9 +5,16 @@
 </head>
 
 <body>
+<div id = "mainpanel">
   <h1>Here we shall discuss street fighter 2</h1>
-
-  <a href="/writing">Write a post</a>
+  <table width="100%">
+    <% postset.forEach(function(bpost) { %>
+      <%- include('blogpostpreview',{post: bpost}) %>
+      <% }) %>
+  </table>
+<br/><br/>
+<a href="write/">Write a post</a>
+</div>
 
 <%- include('navbar.ejs') %>
 

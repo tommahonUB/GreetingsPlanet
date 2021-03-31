@@ -82,15 +82,23 @@ app.get('/EHonda', function(req, res) {
 
 //new requests since tutorial 4
 
-app.get('/blog', (req, res)=>{
-    res.render('blog', {data: req.session});
+app.get('/blog/', async (req, res)=>{
+		var posts = await Blogpost.find({}, (error, result) => {
+			if(error) {
+				console.log(error);
+				res.sendStatus(500);
+			}
+			console.log(result);
+    	res.render('blog', {data: req.session, postset: result});
+		});
+
 });
 
 app.get('/writing', (req, res)=>{
     res.render('writing', {data: req.session});
 });
 
-app.get('/blog/entry', (req, res)=>{
+app.get('/blog/entry/', (req, res)=>{
     res.render('entry', {data: req.session, entry: {}});
 });
 
@@ -103,7 +111,7 @@ app.post('/welcome', (req, res) => {
 
 app.post('/blog/writepost', async (req, res)=>{
 	console.log(req.body);
-	let newPost = new BlogPost(req.body);
+	let newPost = new BlogPost({title: req.body.title, body: req.body.entrytext});
 	await newPost.save();
 	res.redirect('/');
 });
