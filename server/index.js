@@ -80,10 +80,10 @@ app.get('/EHonda', function(req, res) {
 	res.render('EHonda', {data: req.session});
 });
 
-//new requests since tutorial 4
+//new get requests since tutorial 4
 
 app.get('/blog/', async (req, res)=>{
-		var posts = await Blogpost.find({}, (error, result) => {
+		var posts = await BlogPost.find({}, (error, result) =>{
 			if(error) {
 				console.log(error);
 				res.sendStatus(500);
@@ -91,15 +91,47 @@ app.get('/blog/', async (req, res)=>{
 			console.log(result);
     	res.render('blog', {data: req.session, postset: result});
 		});
-
-});
+	});
 
 app.get('/writing', (req, res)=>{
-    res.render('writing', {data: req.session});
+    res.render('writing', {data: req.session, draft: {}});
 });
 
 app.get('/blog/entry/', (req, res)=>{
     res.render('entry', {data: req.session, entry: {}});
+});
+
+app.get('/blog/:id/', (req, res) => {
+		var searchID = req.params.id;
+		BlogPost.findById(searchID, (error, result) => {
+			if(error) {
+				console.log(error);
+				res.redirect('/blog/');
+			}
+			else if(!result) {
+				res.status(404);
+			}
+			else {
+				res.render('entry',{data: req.session, entry: result});
+			}
+		})
+});
+
+app.get('/blog/:id/edit', (req,res)=>{
+    BlogPost.findById(req.params.id, (error, result)=>{
+        if(error) res.redirect('/blog/');
+        else if(!result) res.redirect('/blog/');
+        else res.render('writing', {data: req.session, draft: result} );
+    });
+});
+
+app.get('/blog/:id/delete', (req, res)=>{
+    BlogPost.deleteOne({_id: req.params.id}, (error, result)=>{
+        if(error) {
+            console.log(error);
+        }
+        res.redirect('/blog/');
+    });
 });
 
 app.post('/welcome', (req, res) => {
@@ -107,11 +139,44 @@ app.post('/welcome', (req, res) => {
     res.send('SUCCESS');
 });
 
-//tutorial 4 post requests
+//tutorial 4 post requests {title: req.body.title, body: req.body.entrytext}
 
 app.post('/blog/writepost', async (req, res)=>{
 	console.log(req.body);
-	let newPost = new BlogPost({title: req.body.title, body: req.body.entrytext});
-	await newPost.save();
-	res.redirect('/');
+	try {
+		let newPost = new BlogPost(req.body);
+		await newPost.save();
+		res.redirect('/blog/');
+	}
+	catch(e) {
+		res.redirect('/blog/writing/')
+	}
+});
+
+app.post('/blog/:id/edit', (req, res)=>{
+    BlogPost.findById(req.params.id, (error, result)=>{
+        if(error) {
+            console.log(error);
+            res.status(500);
+        }
+        else if (result) {
+            result.title = req.body.title;
+            result.body = req.body.body;
+            result.save();
+            res.redirect(path.join('/blog/', req.params.id));
+        }
+        else res.redirect('/blog/');
+    });
+});
+
+//tutorial 4 other put and delete requests
+
+app.put('/blog/:id/update', (req, res)=> {
+	console.log(req);
+	res.redirect('/blog/');
+});
+
+app.delete('/blog/:id/update', (req, res) => {
+	console.log(req);
+	res.redirect('/blog/');
 });
