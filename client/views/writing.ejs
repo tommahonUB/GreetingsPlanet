@@ -14,11 +14,20 @@
 <form action="/blog/writepost" method="POST">
 <% } %>
 
-  <input name="title" type="text" value="TITLE">title</input><br>
-  <textarea name="entrytext" style="width: 100%; height:500px"></textarea></br>
-  <button type="submit">Post</button>
-</form>
-</div>
+
+<input id="title" name="title" type="text"/><br/>
+
+<textarea name="body" style="width: 100%; height:500px">
+<% if(draft.body) { %><%= draft.body %><% } %>
+</textarea><br/>
+
+<% if(draft.title) { %>
+  <button type="submit">Update!</button>
+  <% } else { %>
+  <button type="submit">Post!</button>
+  <% } %>
+  </form>
+  </div>
 
 <%- include('navbar.ejs') %>
 
@@ -28,7 +37,6 @@ $(()=>{
     if(title!="") $('#title').val(title);
 })
 </script>
-
 </body>
 
 </html>

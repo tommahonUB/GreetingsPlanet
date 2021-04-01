@@ -118,11 +118,11 @@ app.get('/blog/:id/', (req, res) => {
 });
 
 app.get('/blog/:id/edit', (req,res)=>{
-    BlogPost.findById(req.params.id, (error, result)=>{
-        if(error) res.redirect('/blog/');
-        else if(!result) res.redirect('/blog/');
-        else res.render('writing', {data: req.session, draft: result} );
-    });
+    BlogPost.findById(req.params.id, (error, result)=> {
+      if(error) res.redirect('/blog/');
+      else if(!result) res.redirect('/blog/');
+      else res.render('writing', {data: req.session, draft: result} );
+  });
 });
 
 app.get('/blog/:id/delete', (req, res)=>{
@@ -149,7 +149,7 @@ app.post('/blog/writepost', async (req, res)=>{
 		res.redirect('/blog/');
 	}
 	catch(e) {
-		res.redirect('/blog/writing/')
+		res.redirect('/blog/writing/', {data: req.session});
 	}
 });
 
@@ -163,7 +163,7 @@ app.post('/blog/:id/edit', (req, res)=>{
             result.title = req.body.title;
             result.body = req.body.body;
             result.save();
-            res.redirect(path.join('/blog/', req.params.id));
+            res.redirect('/blog/');
         }
         else res.redirect('/blog/');
     });
@@ -177,6 +177,11 @@ app.put('/blog/:id/update', (req, res)=> {
 });
 
 app.delete('/blog/:id/update', (req, res) => {
+	BlogPost.deleteOne({id: req.params.id}, (error, result)=> {
+		if(error) {
+			console.log(error);
+		}
+		res.redirect('/blog/');
+	});
 	console.log(req);
-	res.redirect('/blog/');
 });
