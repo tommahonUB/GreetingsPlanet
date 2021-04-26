@@ -1,11 +1,10 @@
 const express = require('express');
 const ejs = require('ejs');
 const path = require('path');
-const { response } = require('express');
-const bodyParser = require('body-parser');
 const session = require('express-session');
 const mongoose = require('mongoose');
-const {BlogPost} = require('./models.js')
+const {BlogPost, User} = require('./models.js')
+const bcrypt = require('bcrypt');
 
 //Navigation
 
@@ -17,7 +16,7 @@ const viewsPath = path.join(clientPath,'/views/')
 
 const app = express();
 app.use(express.static(staticPath));
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(express.urlencoded({extended: true}));
 app.use(session({
 	name: 'Tom',
 	secret: 'eachcathad7kittens',
@@ -27,6 +26,18 @@ app.use(session({
 		maxage: 1000*60*60*24*3,
 	}
 }));
+
+//BLOG Routes lol
+
+const authenticated = function(req, res, next) {
+    if(req.session.authenticated) next();
+    else res.redirect('/login');
+}
+
+const hadouken = function(req, res, next) {
+    if(req.session.isHadouken) next();
+    else res.send('YOU HAVE TO GET AN ACCOUNT TO STAND A CHANCE.');
+}
 
 mongoose.connect('mongodb://localhost:27017/StreetFighter', {useNewUrlParser: true});
 app.listen(2000);
@@ -80,6 +91,14 @@ app.get('/EHonda', function(req, res) {
 	res.render('EHonda', {data: req.session});
 });
 
+app.get('/register', (req, res) => {
+    res.render('register', {data: req.session});
+});
+
+app.get('/login', (req, res) => {
+    res.render('login', {data: req.session});
+});
+
 //new get requests since tutorial 4
 
 app.get('/blog/', async (req, res)=>{
@@ -93,7 +112,7 @@ app.get('/blog/', async (req, res)=>{
 		});
 	});
 
-app.get('/writing', (req, res)=>{
+app.get('/writing', authenticated, hadouken, (req, res)=>{
     res.render('writing', {data: req.session, draft: {}});
 });
 
@@ -112,12 +131,15 @@ app.get('/blog/:id/', (req, res) => {
 				res.status(404);
 			}
 			else {
+				console.log(result);
+				let parsedText = result.body.replace(/\r\n|\r|\n/g,"<br />")
+				result.parsedText = parsedText;
 				res.render('entry',{data: req.session, entry: result});
 			}
 		})
 });
 
-app.get('/blog/:id/edit', (req,res)=>{
+app.get('/blog/:id/edit', hadouken, (req,res)=>{
     BlogPost.findById(req.params.id, (error, result)=> {
       if(error) res.redirect('/blog/');
       else if(!result) res.redirect('/blog/');
@@ -125,7 +147,7 @@ app.get('/blog/:id/edit', (req,res)=>{
   });
 });
 
-app.get('/blog/:id/delete', (req, res)=>{
+app.get('/blog/:id/delete', hadouken, (req, res)=>{
     BlogPost.deleteOne({_id: req.params.id}, (error, result)=>{
         if(error) {
             console.log(error);
@@ -141,10 +163,11 @@ app.post('/welcome', (req, res) => {
 
 //tutorial 4 post requests {title: req.body.title, body: req.body.entrytext}
 
-app.post('/blog/writepost', async (req, res)=>{
+app.post('/blog/writepost', authenticated, hadouken, async (req, res)=>{
 	console.log(req.body);
 	try {
 		let newPost = new BlogPost(req.body);
+		newPost.author = req.session.username;
 		await newPost.save();
 		res.redirect('/blog/');
 	}
@@ -176,7 +199,7 @@ app.put('/blog/:id/update', (req, res)=> {
 	res.redirect('/blog/');
 });
 
-app.delete('/blog/:id/update', (req, res) => {
+app.delete('/blog/:id/update', hadouken, (req, res) => {
 	BlogPost.deleteOne({id: req.params.id}, (error, result)=> {
 		if(error) {
 			console.log(error);
@@ -184,4 +207,71 @@ app.delete('/blog/:id/update', (req, res) => {
 		res.redirect('/blog/');
 	});
 	console.log(req);
+});
+
+app.post('/register', async (req, res)=>{
+    try {
+        let rawpass = req.body.password;
+        var hashedpass = await bcrypt.hash(rawpass, 10);
+        var user = new User(req.body);
+        user.password = hashedpass;
+        await user.save();
+        res.redirect('/login');
+    }
+    catch(e) {
+        console.log(e);
+        res.send("Unable to register!");
+    }
+})
+
+app.post('/login', (req, res)=>{
+    User.findOne({username: req.body.username}, async (error, result)=>{
+        if(error) {
+            console.log(error);
+            res.send("!");
+        }
+        else if(!result) res.send("User not found.");
+        else {
+            try {
+                let match = await bcrypt.compare(req.body.password, result.password);
+                if(match) {
+                    req.session.username = result.username;
+                    req.session.authenticated = true;
+                    req.session.isHadouken = result.isHadouken;
+                    res.redirect('/blog/');
+                }
+                else res.send('Incorrect password');
+            }
+            catch(e) {
+                console.log(e);
+                res.send('Error');
+            }
+
+        }
+    })
+
+})
+
+//comments
+
+app.post('/blog/:id/comment', hadouken, (req, res)=>{
+	BlogPost.findById(req.params.id, (error, result)=>{
+        if(error) {
+            console.log(error);
+            res.send('Error');
+        }
+        else if(!result) {
+            res.redirect('/blog/');
+        }
+        else {
+            result.comments.push({author: req.session.username, text: req.body.comment});
+            result.save();
+            res.redirect(path.join('/blog/', req.params.id+'/'));
+        }
+    });
+});
+
+app.post('/blog/:id/deletecomment/:comment', hadouken, (req, res)=>{
+	console.log(req.body);
+	res.send('Deleting comment');
 });

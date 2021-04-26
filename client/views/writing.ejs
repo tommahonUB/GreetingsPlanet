@@ -9,9 +9,9 @@
 <h1>Drop knowledge:</h1>
 
 <% if(draft._id) { %>
-<form action="/blog/<%=draft._id%>/edit" method="POST">
+  <form action="/blog/<%=draft._id%>/edit" method="POST">
 <% } else { %>
-<form action="/blog/writepost" method="POST">
+  <form action="/blog/writepost" method="POST">
 <% } %>
 
 
