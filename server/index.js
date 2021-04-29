@@ -34,9 +34,9 @@ const authenticated = function(req, res, next) {
     else res.redirect('/login');
 }
 
-const hadouken = function(req, res, next) {
-    if(req.session.isHadouken) next();
-    else res.send('YOU HAVE TO GET AN ACCOUNT TO STAND A CHANCE.');
+const dragonmaster = function(req, res, next) {
+    if(req.session.isDragonmaster) next();
+    else res.send('YOU MUST GET A DRAGONMASTER ACCOUNT TO STAND A CHANCE.');
 }
 
 mongoose.connect('mongodb://localhost:27017/StreetFighter', {useNewUrlParser: true});
@@ -112,7 +112,7 @@ app.get('/blog/', async (req, res)=>{
 		});
 	});
 
-app.get('/writing', authenticated, hadouken, (req, res)=>{
+app.get('/writing', authenticated, dragonmaster, (req, res)=>{
     res.render('writing', {data: req.session, draft: {}});
 });
 
@@ -139,7 +139,7 @@ app.get('/blog/:id/', (req, res) => {
 		})
 });
 
-app.get('/blog/:id/edit', hadouken, (req,res)=>{
+app.get('/blog/:id/edit', dragonmaster, (req,res)=>{
     BlogPost.findById(req.params.id, (error, result)=> {
       if(error) res.redirect('/blog/');
       else if(!result) res.redirect('/blog/');
@@ -147,7 +147,7 @@ app.get('/blog/:id/edit', hadouken, (req,res)=>{
   });
 });
 
-app.get('/blog/:id/delete', hadouken, (req, res)=>{
+app.get('/blog/:id/delete', dragonmaster, (req, res)=>{
     BlogPost.deleteOne({_id: req.params.id}, (error, result)=>{
         if(error) {
             console.log(error);
@@ -163,7 +163,7 @@ app.post('/welcome', (req, res) => {
 
 //tutorial 4 post requests {title: req.body.title, body: req.body.entrytext}
 
-app.post('/blog/writepost', authenticated, hadouken, async (req, res)=>{
+app.post('/blog/writepost', authenticated, dragonmaster, async (req, res)=>{
 	console.log(req.body);
 	try {
 		let newPost = new BlogPost(req.body);
@@ -199,7 +199,7 @@ app.put('/blog/:id/update', (req, res)=> {
 	res.redirect('/blog/');
 });
 
-app.delete('/blog/:id/update', hadouken, (req, res) => {
+app.delete('/blog/:id/update', dragonmaster, (req, res) => {
 	BlogPost.deleteOne({id: req.params.id}, (error, result)=> {
 		if(error) {
 			console.log(error);
@@ -237,7 +237,7 @@ app.post('/login', (req, res)=>{
                 if(match) {
                     req.session.username = result.username;
                     req.session.authenticated = true;
-                    req.session.isHadouken = result.isHadouken;
+                    req.session.isDragonmaster = result.isDragonmaster;
                     res.redirect('/blog/');
                 }
                 else res.send('Incorrect password');
@@ -254,7 +254,7 @@ app.post('/login', (req, res)=>{
 
 //comments
 
-app.post('/blog/:id/comment', hadouken, (req, res)=>{
+app.post('/blog/:id/comment', dragonmaster, (req, res)=>{
 	BlogPost.findById(req.params.id, (error, result)=>{
         if(error) {
             console.log(error);
@@ -266,12 +266,12 @@ app.post('/blog/:id/comment', hadouken, (req, res)=>{
         else {
             result.comments.push({author: req.session.username, text: req.body.comment});
             result.save();
-            res.redirect(path.join('/blog/', req.params.id+'/'));
+            res.redirect('/blog/');
         }
     });
 });
 
-app.post('/blog/:id/deletecomment/:comment', hadouken, (req, res)=>{
+app.post('/blog/:id/deletecomment/:comment', dragonmaster, (req, res)=>{
 	console.log(req.body);
 	res.send('Deleting comment');
 });
